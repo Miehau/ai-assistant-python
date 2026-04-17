@@ -1,0 +1,3 @@
+[submodule "reference/original"]
+	path = reference/original
+	url = git@github.com:Miehau/ai-assistant.git
