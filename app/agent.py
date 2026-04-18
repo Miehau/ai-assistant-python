@@ -7,6 +7,7 @@ from app.llm_provider import LlmProvider, LlmRequest
 class AgentRequest:
     message: str
 
+
 @dataclass
 class Agent:
     provider: LlmProvider

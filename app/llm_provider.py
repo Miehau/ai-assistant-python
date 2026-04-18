@@ -6,6 +6,7 @@ from typing import Protocol
 class LlmRequest:
     message: str
 
+
 class LlmProvider(Protocol):
     def complete(self, request: LlmRequest) -> str:
         ...
