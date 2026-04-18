@@ -4,11 +4,12 @@ from app.agent import Agent, AgentRequest
 from app.config import load_config
 from app.models import ChatRequest, ChatResponse
 from app.openrouter import OpenRouterProvider
+from app.tools.horoscope import HoroscopeTool
 
 
 app = FastAPI()
 config = load_config()
-agent = Agent(provider=OpenRouterProvider(config.openrouter))
+agent = Agent(provider=OpenRouterProvider(config.openrouter), tools=[HoroscopeTool()])
 
 
 @app.get("/")
