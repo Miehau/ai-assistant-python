@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from agent import Agent, AgentRequest
-from openrouter import OpenRouter
+from app.agent import Agent, AgentRequest
+from app.openrouter import OpenRouter
 
 
 app = FastAPI()
