@@ -20,8 +20,7 @@ class OpenRouterProvider:
                 model=self.config.model,
                 stream=False
             )
-            print(response)
         response_content = response.choices[0].message.content
         if not isinstance(response_content, str):
-            raise RuntimeError("OpenRouter response did not contrain text content")
+            raise RuntimeError("OpenRouter response did not contain text content")
         return response_content
