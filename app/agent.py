@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 
 from app.llm_provider import LlmProvider, LlmRequest
@@ -14,16 +14,19 @@ class AgentRequest:
 class Agent:
     provider: LlmProvider
     tools: list[Tool]
+    tools_by_name: dict[str, Tool] = field(init=False)
 
     def answer(self, request: AgentRequest) -> str:
-        tool_by_name = {
-            tool.name : tool
-            for tool in self.tools
-        }
         llm_response = self.provider.complete(LlmRequest(message=request.message, tools=self.tools))
         if llm_response.message is not None:
             return llm_response.message
         for tool_name, arguments in llm_response.tools.items():
-            tool = tool_by_name[tool_name]
+            tool = self.tools_by_name[tool_name]
             return tool.run(arguments)
         raise RuntimeError("LLM returned neither message nor tool call")
+    
+    def __post_init__(self) -> None:
+        self.tools_by_name = {
+            tool.name: tool
+            for tool in self.tools
+        }
