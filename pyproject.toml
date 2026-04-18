@@ -15,9 +15,13 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pyright>=1.1.408",
+    "pytest>=9.0.3",
 ]
 
 [tool.pyright]
 include = ["main.py", "app"]
 pythonVersion = "3.14"
 typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
