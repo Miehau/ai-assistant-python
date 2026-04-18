@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 
 from app.agent import Agent, AgentRequest
+from app.models import ChatRequest, ChatResponse
 from app.openrouter import OpenRouter
 
 
@@ -16,14 +16,8 @@ def read_root():
 def health():
     return {"status": "ok"}
 
-
-
-class ChatRequest(BaseModel):
-    message: str
-
-
-@app.post("/chat")
+@app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     agent_message = AgentRequest(message=request.message)
     response = agent.answer(agent_message)
-    return {"answer" : response}
+    return ChatResponse(answer=response)
