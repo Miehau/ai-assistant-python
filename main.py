@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 
 from app.agent import Agent, AgentRequest
+from app.config import load_config
 from app.models import ChatRequest, ChatResponse
 from app.openrouter import OpenRouter
 
 
 app = FastAPI()
-agent = Agent(provider=OpenRouter())
+config = load_config()
+agent = Agent(provider=OpenRouter(config.openrouter))
 
 
 @app.get("/")
