@@ -10,3 +10,13 @@ dependencies = [
     "openrouter>=0.9.1",
     "uvicorn>=0.44.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+]
+
+[tool.pyright]
+include = ["main.py", "app"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
