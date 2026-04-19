@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 
 from app.agent import Agent, AgentRequest
 from app.config import load_config
@@ -27,3 +28,12 @@ async def chat(request: ChatRequest):
     agent_message = AgentRequest(message=request.message)
     response = await agent.answer(agent_message)
     return ChatResponse(answer=response)
+
+
+@app.post("/chat_async")
+async def chat_async(request: ChatRequest):
+    agent_request = AgentRequest(message=request.message)
+    return StreamingResponse(
+        agent.answer_async(agent_request),
+        media_type="text/plain"
+    )

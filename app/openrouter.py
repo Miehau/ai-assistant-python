@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 import json
 
 from openrouter import OpenRouter
@@ -56,3 +57,30 @@ class OpenRouterProvider:
             raise RuntimeError("OpenRouter response did not contain text content")
 
         return LlmResponse(message=response_content, tools={})
+    
+    async def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
+        messages: list[ChatMessagesTypedDict] = [
+            {
+                "role": "user",
+                "content": request.message,
+            },
+        ]
+        tools: list[ChatFunctionToolTypedDict] = []
+
+        async with OpenRouter(api_key=self.config.api_key) as open_router:
+            stream = await open_router.chat.send_async(
+                messages=messages,
+                model=self.config.model,
+                tools=tools,
+                stream=True,
+            )
+
+            async with stream:
+                async for chunk in stream:
+                    if len(chunk.choices) == 0:
+                        continue
+
+                    content = chunk.choices[0].delta.content
+
+                    if isinstance(content, str):
+                        yield content

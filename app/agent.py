@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 
 from app.llm_provider import LlmProvider, LlmRequest
@@ -28,6 +29,11 @@ class Agent:
             f"{tool_name}: {tool_outcome}"
             for tool_name, tool_outcome in tool_outcomes.items()
         )
+    
+    async def answer_async(self, request: AgentRequest) -> AsyncIterator[str]:
+        async for chunk in self.provider.complete_stream(LlmRequest(message=request.message, tools=[])):
+            yield chunk
+
     
     def __post_init__(self) -> None:
         self.tools_by_name = {

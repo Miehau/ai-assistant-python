@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -16,4 +17,7 @@ class LlmResponse:
 
 class LlmProvider(Protocol):
     def complete(self, request: LlmRequest) -> LlmResponse:
+        ...
+
+    def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
         ...
