@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-import json
 
 from app.llm_provider import LlmProvider, LlmRequest
 from app.tools.tools import Tool
@@ -13,7 +12,7 @@ class AgentRequest:
 @dataclass
 class Agent:
     provider: LlmProvider
-    tools: list[Tool]
+    tools: list[Tool] = field(default_factory=list)
     tools_by_name: dict[str, Tool] = field(init=False)
 
     def answer(self, request: AgentRequest) -> str:
