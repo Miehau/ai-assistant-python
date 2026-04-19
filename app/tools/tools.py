@@ -6,5 +6,5 @@ class Tool(Protocol):
     description: str
     parameters: dict[str, Any]
 
-    def run(self, arguments: dict[str, Any]) -> str:
+    async def run(self, arguments: dict[str, Any]) -> str:
         ...

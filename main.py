@@ -23,7 +23,7 @@ def health():
 
 
 @app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     agent_message = AgentRequest(message=request.message)
-    response = agent.answer(agent_message)
+    response = await agent.answer(agent_message)
     return ChatResponse(answer=response)

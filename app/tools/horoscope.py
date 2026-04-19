@@ -16,7 +16,7 @@ class HoroscopeTool:
       "additionalProperties": False,
     }
 
-    def run(self, arguments: dict[str, Any]) -> str:
+    async def run(self, arguments: dict[str, Any]) -> str:
         sign = arguments.get("sign")
         if not isinstance(sign, str):
             raise ValueError("sign must be a string")

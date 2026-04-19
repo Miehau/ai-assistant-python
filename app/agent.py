@@ -15,14 +15,19 @@ class Agent:
     tools: list[Tool] = field(default_factory=list)
     tools_by_name: dict[str, Tool] = field(init=False)
 
-    def answer(self, request: AgentRequest) -> str:
+    async def answer(self, request: AgentRequest) -> str:
         llm_response = self.provider.complete(LlmRequest(message=request.message, tools=self.tools))
         if llm_response.message is not None:
             return llm_response.message
-        for tool_name, arguments in llm_response.tools.items():
-            tool = self.tools_by_name[tool_name]
-            return tool.run(arguments)
-        raise RuntimeError("LLM returned neither message nor tool call")
+        
+        tool_outcomes = {
+            tool_name: await self.tools_by_name[tool_name].run(arguments)
+            for tool_name, arguments in llm_response.tools.items()
+        }
+        return "\n".join(
+            f"{tool_name}: {tool_outcome}"
+            for tool_name, tool_outcome in tool_outcomes.items()
+        )
     
     def __post_init__(self) -> None:
         self.tools_by_name = {
