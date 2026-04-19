@@ -41,9 +41,12 @@ class OpenRouterProvider:
         print(json.dumps(response.model_dump(), indent=2))
 
         if(response.choices[0].finish_reason=="tool_calls"):
+            if response.choices[0].message.tool_calls is None:
+                raise RuntimeError("Tool calls returned by LLM contain no tool calls.")
             return LlmResponse(tools=
                 {
-                    response.choices[0].message.tool_calls[0].function.name: json.loads(response.choices[0].message.tool_calls[0].function.arguments)
+                    tool_call.function.name : json.loads(tool_call.function.arguments)
+                    for tool_call in response.choices[0].message.tool_calls
                 }
             )
         
