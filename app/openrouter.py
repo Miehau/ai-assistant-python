@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 import json
+from typing import Literal, overload
 
 from openrouter import OpenRouter
 from openrouter.components import ChatFunctionToolTypedDict, ChatMessagesTypedDict
@@ -12,7 +13,21 @@ class OpenRouterProvider:
     def __init__(self, config: OpenRouterConfig) -> None:
         self.config = config
 
-    def complete(self, request: LlmRequest) -> LlmResponse:
+    @overload
+    def complete(self, request: LlmRequest, stream_response: Literal[False] = False) -> LlmResponse:
+        ...
+
+    @overload
+    def complete(self, request: LlmRequest, stream_response: Literal[True]) -> AsyncIterator[str]:
+        ...
+
+    def complete(self, request: LlmRequest, stream_response: bool = False) -> LlmResponse | AsyncIterator[str]:
+        if stream_response:
+            return self._complete_async(request)
+
+        return self._complete_sync(request)
+
+    def _complete_sync(self, request: LlmRequest) -> LlmResponse:
         messages: list[ChatMessagesTypedDict] = [
             {
                 "role": "user",
@@ -58,7 +73,8 @@ class OpenRouterProvider:
 
         return LlmResponse(message=response_content, tools={})
     
-    async def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
+
+    async def _complete_async(self, request: LlmRequest) -> AsyncIterator[str]:
         messages: list[ChatMessagesTypedDict] = [
             {
                 "role": "user",

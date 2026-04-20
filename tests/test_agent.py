@@ -8,16 +8,30 @@ from app.llm_provider import LlmRequest, LlmResponse
 
 
 class FakeProvider:
-    def complete(self, request: LlmRequest) -> LlmResponse:
+    def complete(
+        self,
+        request: LlmRequest,
+        stream_response: bool = False,
+    ) -> LlmResponse | AsyncIterator[str]:
+        if stream_response:
+            return self._complete_stream(request)
+
         return LlmResponse(message=f"fake: {request.message}", tools={})
     
-    async def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
+    async def _complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
         yield "Hel"
         yield "lo"
 
 
 class FakeToolProvider:
-    def complete(self, request: LlmRequest) -> LlmResponse:
+    def complete(
+        self,
+        request: LlmRequest,
+        stream_response: bool = False,
+    ) -> LlmResponse | AsyncIterator[str]:
+        if stream_response:
+            raise AssertionError("streaming should not be called")
+
         return LlmResponse(
             message=None,
             tools={
@@ -26,9 +40,6 @@ class FakeToolProvider:
                 },
             },
         )
-
-    def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
-        raise AssertionError("complete_stream should not be called")
 
 
 class FakeTool:

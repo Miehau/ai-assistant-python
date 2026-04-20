@@ -1,13 +1,14 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 
-from app.llm_provider import LlmProvider, LlmRequest
+from app.llm_provider import LlmProvider, LlmRequest, LlmResponse
 from app.tools.tools import Tool
 
 
 @dataclass
 class AgentRequest:
     message: str
+    stream: bool = False
 
 
 @dataclass
@@ -29,9 +30,14 @@ class Agent:
             f"{tool_name}: {tool_outcome}"
             for tool_name, tool_outcome in tool_outcomes.items()
         )
+
+
     
     async def answer_async(self, request: AgentRequest) -> AsyncIterator[str]:
-        async for chunk in self.provider.complete_stream(LlmRequest(message=request.message, tools=[])):
+        async for chunk in self.provider.complete(
+            LlmRequest(message=request.message, tools=[]),
+            stream_response=True,
+        ):
             yield chunk
 
     

@@ -1,6 +1,6 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol, overload
 
 from app.tools.tools import Tool
 
@@ -16,8 +16,18 @@ class LlmResponse:
     message: str | None = None
 
 class LlmProvider(Protocol):
-    def complete(self, request: LlmRequest) -> LlmResponse:
-        ...
+      @overload
+      def complete(
+          self,
+          request: LlmRequest,
+          stream_response: Literal[False] = False,
+      ) -> LlmResponse:
+          ...
 
-    def complete_stream(self, request: LlmRequest) -> AsyncIterator[str]:
-        ...
+      @overload
+      def complete(
+          self,
+          request: LlmRequest,
+          stream_response: Literal[True],
+      ) -> AsyncIterator[str]:
+          ...
