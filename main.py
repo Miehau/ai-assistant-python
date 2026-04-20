@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
@@ -11,6 +13,7 @@ from app.tools.horoscope import HoroscopeTool
 app = FastAPI()
 config = load_config()
 agent = Agent(provider=OpenRouterProvider(config.openrouter), tools=[HoroscopeTool()])
+logging.basicConfig(level=logging.INFO)
 
 
 @app.get("/")

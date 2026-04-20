@@ -1,5 +1,7 @@
 from typing import Any
 
+from app.tools.tools import log_tool_call
+
 
 class HoroscopeTool:
     name: str = "check_horoscope"
@@ -16,6 +18,7 @@ class HoroscopeTool:
       "additionalProperties": False,
     }
 
+    @log_tool_call
     async def run(self, arguments: dict[str, Any]) -> str:
         sign = arguments.get("sign")
         if not isinstance(sign, str):
