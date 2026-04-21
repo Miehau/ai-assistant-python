@@ -18,7 +18,9 @@ class Agent:
     tools_by_name: dict[str, Tool] = field(init=False)
 
     async def answer(self, request: AgentRequest) -> str:
-        llm_response = self.provider.complete(LlmRequest(message=request.message, tools=self.tools))
+        llm_response = await self.provider.complete(
+            LlmRequest(message=request.message, tools=self.tools)
+        )
         if llm_response.message is not None:
             return llm_response.message
         
@@ -34,9 +36,8 @@ class Agent:
 
     
     async def answer_async(self, request: AgentRequest) -> AsyncIterator[str]:
-        async for chunk in self.provider.complete(
-            LlmRequest(message=request.message, tools=[]),
-            stream_response=True,
+        async for chunk in self.provider.stream_complete(
+            LlmRequest(message=request.message, tools=[])
         ):
             yield chunk
 

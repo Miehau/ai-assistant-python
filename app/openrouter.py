@@ -1,6 +1,5 @@
 from collections.abc import AsyncIterator
 import json
-from typing import Literal, overload
 
 from openrouter import OpenRouter
 from openrouter.components import ChatFunctionToolTypedDict, ChatMessagesTypedDict
@@ -13,21 +12,7 @@ class OpenRouterProvider:
     def __init__(self, config: OpenRouterConfig) -> None:
         self.config = config
 
-    @overload
-    def complete(self, request: LlmRequest, stream_response: Literal[False] = False) -> LlmResponse:
-        ...
-
-    @overload
-    def complete(self, request: LlmRequest, stream_response: Literal[True]) -> AsyncIterator[str]:
-        ...
-
-    def complete(self, request: LlmRequest, stream_response: bool = False) -> LlmResponse | AsyncIterator[str]:
-        if stream_response:
-            return self._complete_async(request)
-
-        return self._complete_sync(request)
-
-    def _complete_sync(self, request: LlmRequest) -> LlmResponse:
+    async def complete(self, request: LlmRequest) -> LlmResponse:
         messages: list[ChatMessagesTypedDict] = [
             {
                 "role": "user",
@@ -46,8 +31,8 @@ class OpenRouterProvider:
             for tool in request.tools
         ]
 
-        with OpenRouter(api_key=self.config.api_key) as open_router:
-            response = open_router.chat.send(
+        async with OpenRouter(api_key=self.config.api_key) as open_router:
+            response = await open_router.chat.send_async(
                 messages=messages,
                 model=self.config.model,
                 tools=tools,
@@ -74,7 +59,7 @@ class OpenRouterProvider:
         return LlmResponse(message=response_content, tools=[])
     
 
-    async def _complete_async(self, request: LlmRequest) -> AsyncIterator[str]:
+    async def stream_complete(self, request: LlmRequest) -> AsyncIterator[str]:
         messages: list[ChatMessagesTypedDict] = [
             {
                 "role": "user",
