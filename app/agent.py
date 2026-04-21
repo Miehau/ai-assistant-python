@@ -24,7 +24,7 @@ class Agent:
         
         tool_outcomes = {
             tool_name: await self.tools_by_name[tool_name].run(arguments)
-            for tool_name, arguments in llm_response.tools.items()
+            for tool_name, arguments in llm_response.tools
         }
         return "\n".join(
             f"{tool_name}: {tool_outcome}"

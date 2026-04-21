@@ -1,6 +1,6 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol, overload
+from typing import Any, List, Literal, Protocol, Tuple, overload
 
 from app.tools.tools import Tool
 
@@ -12,7 +12,7 @@ class LlmRequest:
 
 @dataclass
 class LlmResponse:
-    tools: dict[str, Any]
+    tools: List[Tuple[str, Any]]
     message: str | None = None
 
 class LlmProvider(Protocol):

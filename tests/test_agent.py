@@ -34,11 +34,11 @@ class FakeToolProvider:
 
         return LlmResponse(
             message=None,
-            tools={
-                "fake_tool": {
+            tools=[
+                ("fake_tool", {
                     "name": "Michal",
-                },
-            },
+                }),
+            ],
         )
 
 

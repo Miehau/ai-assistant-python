@@ -60,10 +60,10 @@ class OpenRouterProvider:
             if response.choices[0].message.tool_calls is None:
                 raise RuntimeError("Tool calls returned by LLM contain no tool calls.")
             return LlmResponse(tools=
-                {
-                    tool_call.function.name : json.loads(tool_call.function.arguments)
+                [
+                    (tool_call.function.name, json.loads(tool_call.function.arguments))
                     for tool_call in response.choices[0].message.tool_calls
-                }
+                ]
             )
         
         response_content = response.choices[0].message.content
@@ -71,7 +71,7 @@ class OpenRouterProvider:
         if not isinstance(response_content, str):
             raise RuntimeError("OpenRouter response did not contain text content")
 
-        return LlmResponse(message=response_content, tools={})
+        return LlmResponse(message=response_content, tools=[])
     
 
     async def _complete_async(self, request: LlmRequest) -> AsyncIterator[str]:
