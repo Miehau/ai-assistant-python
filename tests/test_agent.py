@@ -4,28 +4,59 @@ from typing import Any
 import pytest
 
 from app.agent import Agent, AgentRequest
-from app.llm_provider import LlmRequest, LlmResponse
+from app.llm_provider import LlmMessage, LlmRequest, LlmResponse, ToolCall
 
 
 class FakeProvider:
     async def complete(self, request: LlmRequest) -> LlmResponse:
-        return LlmResponse(message=f"fake: {request.message}", tools=[])
+        assert request.messages == [LlmMessage(role="user", content="hello")]
+        return LlmResponse(message="fake: hello")
     
     async def stream_complete(self, request: LlmRequest) -> AsyncIterator[str]:
+        assert request.messages == [LlmMessage(role="user", content="Hello")]
         yield "Hel"
         yield "lo"
 
 
 class FakeToolProvider:
+    def __init__(self) -> None:
+        self.calls = 0
+
     async def complete(self, request: LlmRequest) -> LlmResponse:
-        return LlmResponse(
-            message=None,
-            tools=[
-                ("fake_tool", {
-                    "name": "Michal",
-                }),
-            ],
-        )
+        self.calls += 1
+
+        if self.calls == 1:
+            assert request.messages == [LlmMessage(role="user", content="hello")]
+            return LlmResponse(
+                tool_calls=[
+                    ToolCall(
+                        id="call-1",
+                        name="fake_tool",
+                        arguments={"name": "Michal"},
+                    )
+                ]
+            )
+
+        assert request.messages == [
+            LlmMessage(role="user", content="hello"),
+            LlmMessage(
+                role="assistant",
+                content=None,
+                tool_calls=[
+                    ToolCall(
+                        id="call-1",
+                        name="fake_tool",
+                        arguments={"name": "Michal"},
+                    )
+                ],
+            ),
+            LlmMessage(
+                role="tool",
+                content="Hello Michal",
+                tool_call_id="call-1",
+            ),
+        ]
+        return LlmResponse(message="Done after tool")
 
     async def stream_complete(self, request: LlmRequest) -> AsyncIterator[str]:
         raise AssertionError("streaming should not be called")
@@ -63,8 +94,10 @@ async def test_agent_delegates_stream_to_provider() -> None:
 
 @pytest.mark.asyncio
 async def test_agent_runs_tool_calls() -> None:
-    agent = Agent(provider=FakeToolProvider(), tools=[FakeTool()])
+    provider = FakeToolProvider()
+    agent = Agent(provider=provider, tools=[FakeTool()])
 
     result = await agent.answer(AgentRequest(message="hello"))
 
-    assert result == "fake_tool: Hello Michal"
+    assert result == "Done after tool"
+    assert provider.calls == 2
