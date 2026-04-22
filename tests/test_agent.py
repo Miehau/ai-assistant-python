@@ -4,16 +4,16 @@ from typing import Any
 import pytest
 
 from app.agent import Agent, AgentRequest
-from app.llm_provider import LlmMessage, LlmRequest, LlmResponse, ToolCall
+from app.llm_provider import LlmMessage, LlmRequest, LlmResponse, MessageRole, ToolCall
 
 
 class FakeProvider:
     async def complete(self, request: LlmRequest) -> LlmResponse:
-        assert request.messages == [LlmMessage(role="user", content="hello")]
+        assert request.messages == [LlmMessage(role=MessageRole.USER, content="hello")]
         return LlmResponse(message="fake: hello")
     
     async def stream_complete(self, request: LlmRequest) -> AsyncIterator[str]:
-        assert request.messages == [LlmMessage(role="user", content="Hello")]
+        assert request.messages == [LlmMessage(role=MessageRole.USER, content="Hello")]
         yield "Hel"
         yield "lo"
 
@@ -26,7 +26,7 @@ class FakeToolProvider:
         self.calls += 1
 
         if self.calls == 1:
-            assert request.messages == [LlmMessage(role="user", content="hello")]
+            assert request.messages == [LlmMessage(role=MessageRole.USER, content="hello")]
             return LlmResponse(
                 tool_calls=[
                     ToolCall(
@@ -38,9 +38,9 @@ class FakeToolProvider:
             )
 
         assert request.messages == [
-            LlmMessage(role="user", content="hello"),
+            LlmMessage(role=MessageRole.USER, content="hello"),
             LlmMessage(
-                role="assistant",
+                role=MessageRole.ASSISTANT,
                 content=None,
                 tool_calls=[
                     ToolCall(
@@ -51,7 +51,7 @@ class FakeToolProvider:
                 ],
             ),
             LlmMessage(
-                role="tool",
+                role=MessageRole.TOOL,
                 content="Hello Michal",
                 tool_call_id="call-1",
             ),

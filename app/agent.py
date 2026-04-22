@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 
-from app.llm_provider import LlmMessage, LlmProvider, LlmRequest
+from app.llm_provider import LlmMessage, LlmProvider, LlmRequest, MessageRole
 from app.tools.tools import Tool
 
 
@@ -19,7 +19,7 @@ class Agent:
     tools_by_name: dict[str, Tool] = field(init=False)
 
     async def answer(self, request: AgentRequest) -> str:
-        messages = [LlmMessage(role="user", content=request.message)]
+        messages = [LlmMessage(role=MessageRole.USER, content=request.message)]
 
         for _ in range(request.max_iterations):
             llm_response = await self.provider.complete(
@@ -29,7 +29,7 @@ class Agent:
             if llm_response.tool_calls:
                 messages.append(
                     LlmMessage(
-                        role="assistant",
+                        role=MessageRole.ASSISTANT,
                         content=llm_response.message,
                         tool_calls=llm_response.tool_calls,
                     )
@@ -43,7 +43,7 @@ class Agent:
                     tool_result = await tool.run(tool_call.arguments)
                     messages.append(
                         LlmMessage(
-                            role="tool",
+                            role=MessageRole.TOOL,
                             content=tool_result,
                             tool_call_id=tool_call.id,
                         )
@@ -60,7 +60,7 @@ class Agent:
     async def answer_async(self, request: AgentRequest) -> AsyncIterator[str]:
         async for chunk in self.provider.stream_complete(
             LlmRequest(
-                messages=[LlmMessage(role="user", content=request.message)],
+                messages=[LlmMessage(role=MessageRole.USER, content=request.message)],
                 tools=[],
             )
         ):

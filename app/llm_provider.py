@@ -1,8 +1,15 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, Literal, Protocol
+from enum import StrEnum
+from typing import Any, Protocol
 
 from app.tools.tools import Tool
+
+
+class MessageRole(StrEnum):
+    USER = "user"
+    ASSISTANT = "assistant"
+    TOOL = "tool"
 
 
 @dataclass
@@ -14,7 +21,7 @@ class ToolCall:
 
 @dataclass
 class LlmMessage:
-    role: Literal["user", "assistant", "tool"]
+    role: MessageRole
     content: str | None = None
     tool_calls: list[ToolCall] = field(default_factory=list)
     tool_call_id: str | None = None

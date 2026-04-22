@@ -6,7 +6,7 @@ from openrouter import OpenRouter
 from openrouter.components import ChatFunctionToolTypedDict, ChatMessagesTypedDict
 
 from app.config import OpenRouterConfig
-from app.llm_provider import LlmMessage, LlmRequest, LlmResponse, ToolCall
+from app.llm_provider import LlmMessage, LlmRequest, LlmResponse, MessageRole, ToolCall
 
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class OpenRouterProvider:
         ]
 
     def _to_openrouter_message(self, message: LlmMessage) -> ChatMessagesTypedDict:
-        if message.role == "user":
+        if message.role == MessageRole.USER:
             if message.content is None:
                 raise RuntimeError("User message must contain content")
             return {
@@ -101,7 +101,7 @@ class OpenRouterProvider:
                 "content": message.content,
             }
 
-        if message.role == "assistant":
+        if message.role == MessageRole.ASSISTANT:
             assistant_message: ChatMessagesTypedDict = {
                 "role": "assistant",
             }
